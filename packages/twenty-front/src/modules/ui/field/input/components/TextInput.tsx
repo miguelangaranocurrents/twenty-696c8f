@@ -78,19 +78,25 @@ export const TextInput = ({
   const wrapperRef = useRef<HTMLInputElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
 
+  // Keep the raw text while typing: trimming it on every keystroke would drop
+  // the space just typed before the next character arrives
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setInternalText(getValue(event.target.value, shouldTrim));
+    setInternalText(event.target.value);
     onChange?.(getValue(event.target.value, shouldTrim));
   };
   useEffect(() => {
-    setInternalText(getValue(value, shouldTrim));
+    setInternalText((currentText) =>
+      getValue(currentText, shouldTrim) === getValue(value, shouldTrim)
+        ? currentText
+        : getValue(value, shouldTrim),
+    );
   }, [value, shouldTrim]);
 
   useRegisterInputEvents({
     focusId: instanceId,
     inputRef: wrapperRef,
     copyRef: copyRef,
-    inputValue: internalText,
+    inputValue: getValue(internalText, shouldTrim),
     onEnter,
     onEscape,
     onClickOutside,

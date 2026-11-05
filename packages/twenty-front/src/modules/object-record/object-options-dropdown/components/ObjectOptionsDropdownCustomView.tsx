@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ListItem } from 'twenty-ui/primitives/navigation';
 import { SelectOptionIcon } from '@/ui/input/components/SelectOptionIcon';
 import { ObjectOptionsDropdownMenuViewName } from '@/object-record/object-options-dropdown/components/ObjectOptionsDropdownMenuViewName';
@@ -26,7 +27,10 @@ import {
   viewTypeIconMapping,
 } from '@/views/types/ViewType';
 import { useDestroyViewFromCurrentState } from '@/views/view-picker/hooks/useDestroyViewFromCurrentState';
+import { viewPickerInputNameComponentState } from '@/views/view-picker/states/viewPickerInputNameComponentState';
 import { viewPickerReferenceViewIdComponentState } from '@/views/view-picker/states/viewPickerReferenceViewIdComponentState';
+import { viewPickerSelectedIconComponentState } from '@/views/view-picker/states/viewPickerSelectedIconComponentState';
+import { viewPickerVisibilityComponentState } from '@/views/view-picker/states/viewPickerVisibilityComponentState';
 import { useLingui } from '@lingui/react/macro';
 import { isDefined } from 'twenty-shared/utils';
 import {
@@ -104,6 +108,39 @@ export const ObjectOptionsDropdownCustomView = ({
     viewPickerReferenceViewIdComponentState,
     recordIndexId,
   );
+  const setViewPickerInputName = useSetAtomComponentState(
+    viewPickerInputNameComponentState,
+    recordIndexId,
+  );
+  const setViewPickerSelectedIcon = useSetAtomComponentState(
+    viewPickerSelectedIconComponentState,
+    recordIndexId,
+  );
+  const setViewPickerVisibility = useSetAtomComponentState(
+    viewPickerVisibilityComponentState,
+    recordIndexId,
+  );
+
+  // Renaming from this dropdown saves through the view picker state, which is
+  // only seeded from the view picker itself, so seed it with the current view
+  useEffect(() => {
+    setViewPickerReferenceViewId(customViewData?.id ?? '');
+
+    if (isDefined(customViewData)) {
+      setViewPickerInputName(customViewData.name);
+      setViewPickerSelectedIcon(customViewData.icon);
+      setViewPickerVisibility(customViewData.visibility);
+    }
+  }, [
+    customViewData?.id,
+    customViewData?.name,
+    customViewData?.icon,
+    customViewData?.visibility,
+    setViewPickerReferenceViewId,
+    setViewPickerInputName,
+    setViewPickerSelectedIcon,
+    setViewPickerVisibility,
+  ]);
 
   const handleDelete = () => {
     if (!customViewData?.id) {

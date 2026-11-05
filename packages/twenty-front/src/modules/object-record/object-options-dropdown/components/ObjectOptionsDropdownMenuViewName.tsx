@@ -9,6 +9,7 @@ import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/use
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
 import { type View } from '@/views/types/View';
 import { useUpdateViewFromCurrentState } from '@/views/view-picker/hooks/useUpdateViewFromCurrentState';
+import { viewPickerInputNameComponentState } from '@/views/view-picker/states/viewPickerInputNameComponentState';
 import { viewPickerIsDirtyComponentState } from '@/views/view-picker/states/viewPickerIsDirtyComponentState';
 import { viewPickerIsPersistingComponentState } from '@/views/view-picker/states/viewPickerIsPersistingComponentState';
 import { viewPickerSelectedIconComponentState } from '@/views/view-picker/states/viewPickerSelectedIconComponentState';
@@ -70,6 +71,9 @@ export const ObjectOptionsDropdownMenuViewName = ({
   const setViewPickerIsDirty = useSetAtomComponentState(
     viewPickerIsDirtyComponentState,
   );
+  const setViewPickerInputName = useSetAtomComponentState(
+    viewPickerInputNameComponentState,
+  );
 
   const { setAndPersistViewName, setAndPersistViewIcon } =
     useUpdateObjectViewOptions();
@@ -87,10 +91,17 @@ export const ObjectOptionsDropdownMenuViewName = ({
         return;
       }
 
+      // The debounced rename may not have stored the typed name yet
+      setViewPickerInputName(viewName);
       await updateViewFromCurrentState();
     },
     focusId: dropdownId,
-    dependencies: [viewPickerIsPersisting, updateViewFromCurrentState],
+    dependencies: [
+      viewPickerIsPersisting,
+      updateViewFromCurrentState,
+      setViewPickerInputName,
+      viewName,
+    ],
   });
 
   const handleIconChange = ({ iconKey }: { iconKey: string }) => {
